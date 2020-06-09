@@ -5,6 +5,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
+	"time"
 )
 
 type problem struct {
@@ -15,6 +17,7 @@ type problem struct {
 
 func main() {
 	csvFileName := flag.String("csv", "problems.csv", "a csv file in the format of 'question, answer'")
+	timeLimit := flag.Int("limit", 30, "the time limit for the quiz in seconds")
 	flag.Parse()
 
 	// File operations and serializing
@@ -27,7 +30,7 @@ func main() {
 	totalCorrect := 0
 
 	// Driver code for presenting questions and getting answers
-	promptQuestionAndGetAnswer(&problems, &totalCorrect, &incorrectQuestions)
+	promptQuestionAndGetAnswer(&problems, timeLimit, &totalCorrect, &incorrectQuestions)
 
 	// Prints statistics which represents how well the user did
 	printEndingStatistics(totalCorrect, totalQuestions, incorrectQuestions)
@@ -56,23 +59,35 @@ func parseCsvToProblem(content [][]string) []problem {
 	for idx, items := range content {
 		problemArr[idx] = problem{
 			number:   idx + 1,
-			question: items[0],
-			answer:   items[1]}
+			question: strings.TrimSpace(items[0]),
+			answer:   strings.TrimSpace(items[1])}
 	}
 
 	return problemArr
 }
 
-func promptQuestionAndGetAnswer(problems *[]problem, totalCorrect *int, incorrectQuestions *[]problem) {
+func promptQuestionAndGetAnswer(problems *[]problem, timeLimit, totalCorrect *int, incorrectQuestions *[]problem) {
+	timer := time.NewTimer(time.Duration(*timeLimit) * time.Second)
+
 	for _, item := range *problems {
 		fmt.Printf("Problem %d: %s\n", item.number, item.question)
-		var answer string
-		fmt.Scanf("%s\n", &answer)
+		answerCh := make(chan string)
 
-		if answer == item.answer {
-			*totalCorrect++
-		} else {
-			*incorrectQuestions = append(*incorrectQuestions, item)
+		go func() {
+			var answer string
+			fmt.Scanf("%s\n", &answer)
+			answerCh <- answer
+		}()
+
+		select {
+		case <-timer.C:
+			return
+		case answer := <-answerCh:
+			if answer == item.answer {
+				*totalCorrect++
+			} else {
+				*incorrectQuestions = append(*incorrectQuestions, item)
+			}
 		}
 	}
 }
