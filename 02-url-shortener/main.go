@@ -3,10 +3,12 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"urlshort"
+
+	"github.com/ryanluu12345/gophercises/02-url-shortener/urlshort"
 )
 
 func main() {
+	fmt.Printf("yo yo")
 	mux := defaultMux()
 
 	// Build the MapHandler using the mux as the fallback
