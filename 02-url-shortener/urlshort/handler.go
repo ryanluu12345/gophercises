@@ -1,7 +1,6 @@
-package urlshort
+package urlshorter
 
 import (
-	"fmt"
 	"net/http"
 )
 
@@ -12,9 +11,14 @@ import (
 // If the path is not provided in the map, then the fallback
 // http.Handler will be called instead.
 func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.HandlerFunc {
-	//	TODO: Implement this...
 	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Print("TABOIIIII")
+		path := r.URL.Path
+
+		if dest, ok := pathsToUrls[path]; ok {
+			http.Redirect(w, r, dest, http.StatusFound)
+			return
+		}
+
 		fallback.ServeHTTP(w, r)
 	}
 }

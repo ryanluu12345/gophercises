@@ -3,12 +3,10 @@ package main
 import (
 	"fmt"
 	"net/http"
-
-	"github.com/ryanluu12345/gophercises/02-url-shortener/urlshort"
+	urlshorter "shorterurl/urlshort"
 )
 
 func main() {
-	fmt.Printf("yo yo")
 	mux := defaultMux()
 
 	// Build the MapHandler using the mux as the fallback
@@ -16,7 +14,7 @@ func main() {
 		"/urlshort-godoc": "https://godoc.org/github.com/gophercises/urlshort",
 		"/yaml-godoc":     "https://godoc.org/gopkg.in/yaml.v2",
 	}
-	mapHandler := urlshort.MapHandler(pathsToUrls, mux)
+	mapHandler := urlshorter.MapHandler(pathsToUrls, mux)
 
 	// Build the YAMLHandler using the mapHandler as the
 	// fallback
@@ -26,12 +24,14 @@ func main() {
 - path: /urlshort-final
   url: https://github.com/gophercises/urlshort/tree/solution
 `
-	yamlHandler, err := urlshort.YAMLHandler([]byte(yaml), mapHandler)
-	if err != nil {
-		panic(err)
-	}
+	_ = yaml
+	// Uncomment these out when you get to it
+	//yamlHandler, err := urlshorter.YAMLHandler([]byte(yaml), mapHandler)
+	//if err != nil {
+	//	panic(err)
+	//}
 	fmt.Println("Starting the server on :8080")
-	http.ListenAndServe(":8080", yamlHandler)
+	http.ListenAndServe(":8080", mapHandler)
 }
 
 func defaultMux() *http.ServeMux {
