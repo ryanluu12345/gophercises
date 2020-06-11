@@ -24,14 +24,14 @@ func main() {
 - path: /urlshort-final
   url: https://github.com/gophercises/urlshort/tree/solution
 `
-	_ = yaml
-	// Uncomment these out when you get to it
-	//yamlHandler, err := urlshorter.YAMLHandler([]byte(yaml), mapHandler)
-	//if err != nil {
-	//	panic(err)
-	//}
+
+	yamlHandler, err := urlshorter.YAMLHandler([]byte(yaml), mapHandler)
+	if err != nil {
+		panic(err)
+	}
+
 	fmt.Println("Starting the server on :8080")
-	http.ListenAndServe(":8080", mapHandler)
+	http.ListenAndServe(":8080", yamlHandler)
 }
 
 func defaultMux() *http.ServeMux {
